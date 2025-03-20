@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import vaidator from 'validator';
+import validator from 'validator';
 import bcrypt from 'bcrypt';
 
 const user_schema = mongoose.Schema({
@@ -12,7 +12,7 @@ const user_schema = mongoose.Schema({
         type: String,
         required: [true, 'please enter your email'],
         unique: true,
-        validate: [vaidator.isEmail, 'enter right email']
+        validate: [validator.isEmail, 'enter right email']
     },
     password: {
         type: String,
@@ -22,15 +22,22 @@ const user_schema = mongoose.Schema({
     confirm_password: {
         select: false,
         type: String,
-        required: [true, 'please confirm your password']
+        required: [true, 'please confirm your password'],
+        validate: {
+            validator: function(value){
+                return value == this.password;
+            },
+            message: 'your passwords do not match'
+        }
     }
 });
 
 //schema middlewares
+
 user_schema.pre('save', async function(){
     this.password = await bcrypt.hash(this.password, 10);
     this.confirm_password = undefined;
-})
+});
 
 const User = mongoose.model('user', user_schema);
 
