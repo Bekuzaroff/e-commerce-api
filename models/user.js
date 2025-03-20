@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ExpressValidator } from "express-validator";
+import vaidator from 'validator';
 
 const user_schema = mongoose.Schema({
     user_name: {
@@ -11,7 +11,7 @@ const user_schema = mongoose.Schema({
         type: String,
         required: [true, 'please enter your email'],
         unique: true,
-        validate: [ExpressValidator.isEmail, 'enter right email']
+        validate: [vaidator.isEmail, 'enter right email']
     },
     password: {
         type: String,
@@ -24,6 +24,6 @@ const user_schema = mongoose.Schema({
     }
 });
 
-const User = mongoose.model('users', user_schema);
+const User = mongoose.model('user', user_schema);
 
 export default User;

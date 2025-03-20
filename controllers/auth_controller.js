@@ -1,10 +1,22 @@
+import User from "../models/user.js";
 class Auth_controller{
-    // sign_up(req, res) {
-        
-    // }
+    async sign_up(req, res, next) {
+        try{
+            await User.insertOne(req.body);
+
+            res.status(201).json({
+                message: 'success',
+            })
+        }catch(e){
+            res.status(400).json({
+                message: e.message,
+            })
+        }
+    }
 
     // sign_in(req, res) {
         
     // }
     
 }
+export default Auth_controller;
