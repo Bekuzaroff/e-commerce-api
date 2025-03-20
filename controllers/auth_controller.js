@@ -1,8 +1,11 @@
 import User from "../models/user.js";
+
 class Auth_controller{
     async sign_up(req, res, next) {
         try{
-            await User.insertOne(req.body);
+            let user = await User.insertOne(req.body);
+
+
 
             res.status(201).json({
                 message: 'success',
