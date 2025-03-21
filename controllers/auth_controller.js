@@ -12,19 +12,37 @@ class Auth_controller{
             let token = Auth_controller.sign_jwt(user._id);
             
             res.status(201).json({
-                message: 'success',
+                status: 'success',
                 token
             })
         }catch(e){
             res.status(400).json({
+                status: 'fail',
                 message: e.message,
             })
         }
     }
 
-    // sign_in(req, res) {
-        
-    // }
+    async sign_in(req, res, next) {
+        const {email, password} = req.body;
+        let user = await User.findOne({email});
+
+        if(!(await user.right_password(password, user.password))){
+            res.status(400).json({
+                status: 'fail',
+                message: 'wrong password'
+            })
+            return next();
+        }
+
+        let token = Auth_controller.sign_jwt(user._id);
+
+        res.status(201).json({
+            message: 'success',
+            token
+        })
+
+    }
     
 }
 export default Auth_controller;

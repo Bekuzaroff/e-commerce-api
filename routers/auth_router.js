@@ -7,8 +7,8 @@ const auth = new Auth_controller();
 router.route('/signup')
     .post(auth.sign_up)
 
-// router.route('/signin')
-//     .post()
+router.route('/signin')
+    .post(auth.sign_in)
 
 // router.route('/forgot_password')
 //     .post()

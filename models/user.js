@@ -6,7 +6,8 @@ const user_schema = mongoose.Schema({
     user_name: {
         type: String,
         unique: true,
-        required: [true, 'please enter user name']
+        required: [true, 'please enter user name'],
+        minlength: 5
     },
     email: {
         type: String,
@@ -31,6 +32,10 @@ const user_schema = mongoose.Schema({
         }
     }
 });
+
+user_schema.methods.right_password = async function(pass, db_pass){
+    return await bcrypt.compare(pass, db_pass);
+}
 
 //schema middlewares
 
