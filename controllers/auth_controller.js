@@ -1,5 +1,7 @@
-import User from "../models/user.js";
-import jsonwebtoken from 'jsonwebtoken';
+const User = require('./../models/user');
+const jsonwebtoken = require('jsonwebtoken');
+const util = require('util');
+
 class Auth_controller{
     static sign_jwt(id){
         return jsonwebtoken.sign({id: id}, process.env.JWT_SECRET_KEY, {
@@ -38,11 +40,25 @@ class Auth_controller{
         let token = Auth_controller.sign_jwt(user._id);
 
         res.status(201).json({
-            message: 'success',
+            status: 'success',
             token
         })
 
     }
+    async update_user_info(req, res, next){
+        const token = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
+        const id = token.id;
+
+        let user = await User.findByIdAndUpdate(id, req.body);
+
+        res.status(200).json({
+            status: 'success',
+            data: req.body
+        })
+
+
+        
+    }
     
 }
-export default Auth_controller;
+module.exports = Auth_controller;

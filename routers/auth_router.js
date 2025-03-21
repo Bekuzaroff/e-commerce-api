@@ -1,5 +1,5 @@
-import express from 'express';
-import Auth_controller from './../controllers/auth_controller.js';
+const express = require('express');
+const Auth_controller = require('./../controllers/auth_controller');
 
 const router = express.Router();
 const auth = new Auth_controller();
@@ -19,7 +19,7 @@ router.route('/signin')
 // router.route('/delete_me')
 //     .delete()
 
-// router.route('update_detailes')
-//     .put()
+router.route('/update_detailes')
+    .patch(auth.update_user_info)
 
-export default router;
+module.exports = router;
