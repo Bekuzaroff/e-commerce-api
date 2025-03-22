@@ -77,23 +77,7 @@ class Auth_controller{
                 data: await User.findOne({_id: id})
             })
         }catch(e){
-            let msg = e.message;
-            let statusCode = 400;
-
-            if(msg == 'jwt must be provided'){
-                msg = 'jwt is not provided';
-            }else if(msg == 'jwt expired'){
-                msg = 'you logged in time expired, please login again';
-            }else if(msg == 'invalid token'){
-                msg = 'the token you provided is not valid';
-            }else if(msg == 'jwt malformed'){
-                msg = 'wrong token form';
-            }else{
-                msg = 'something went wrong, please try again later';
-                statusCode = 500;
-            }
-
-            const err = new CustomError(msg, statusCode);
+            const err = new CustomError(e.message, 400);
             next(err);
         }
     }
@@ -117,23 +101,7 @@ class Auth_controller{
                 message: 'deleted successfully'
             });
         }catch(e){
-            let msg = e.message;
-            let statusCode = 400;
-
-            if(msg == 'jwt must be provided'){
-                msg = 'jwt is not provided';
-            }else if(msg == 'jwt expired'){
-                msg = 'you logged in time expired, please login again';
-            }else if(msg == 'invalid token'){
-                msg = 'the token you provided is not valid';
-            }else if(msg == 'jwt malformed'){
-                msg = 'wrong token form';
-            }else{
-                msg = 'something went wrong, please try again later';
-                statusCode = 500;
-            }
-
-            const err = new CustomError(msg, statusCode);
+            const err = new CustomError(e.message, 400);
             next(err);
         }
     }
