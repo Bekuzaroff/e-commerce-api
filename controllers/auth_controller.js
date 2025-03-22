@@ -4,8 +4,8 @@ const util = require('util');
 const CustomError = require('.././utils/custom_error');
 
 class Auth_controller{
-    static sign_jwt(id){
-        return jsonwebtoken.sign({id: id}, process.env.JWT_SECRET_KEY, {
+    static sign_jwt(id) {
+        return jsonwebtoken.sign({id}, process.env.JWT_SECRET_KEY, {
             expiresIn: process.env.JWT_EXPIRES
         });
     }
@@ -28,6 +28,9 @@ class Auth_controller{
 
             if(msg.includes('user validation failed')){
                 statusCode = 400;
+            }else{
+                statusCode = 500;
+                msg = 'something went wrong';
             }
 
             const err = new CustomError(e.message, statusCode);
@@ -62,20 +65,10 @@ class Auth_controller{
         })
 
     }
-    async update_user_info(req, res, next){
+    async update_user_info(req, res, next) {
         try{
-            if(!(req.headers.jwt)){
-                let err = new CustomError('you have not provided jwt token', 400);
-                return next(err);
-            }
-
             const token = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
             const id = token.id;
-    
-            if(!id){
-                let err = new CustomError('you are not logged in', 400);
-                return next(err);
-            }
     
             await User.updateOne({_id: id}, req.body);
     
@@ -87,10 +80,57 @@ class Auth_controller{
             let msg = e.message;
             let statusCode = 400;
 
-            if(msg == 'jwt expired'){
-                statusCode = 400;
-                msg = 'you logged in time expired, please login again'
-                console.log(msg)
+            if(msg == 'jwt must be provided'){
+                msg = 'jwt is not provided';
+            }else if(msg == 'jwt expired'){
+                msg = 'you logged in time expired, please login again';
+            }else if(msg == 'invalid token'){
+                msg = 'the token you provided is not valid';
+            }else if(msg == 'jwt malformed'){
+                msg = 'wrong token form';
+            }else{
+                msg = 'something went wrong, please try again later';
+                statusCode = 500;
+            }
+
+            const err = new CustomError(msg, statusCode);
+            next(err);
+        }
+    }
+
+    async deleteMe(req, res, next) {
+        try{
+            let token = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
+            let id = token.id;
+
+            let user = await User.findOne({_id: id});
+
+            if(!user){
+                let err = new CustomError('this user does not exist', 404);
+                return next(err);
+            }
+
+            await User.deleteOne({_id: id});
+
+            res.status(200).json({
+                status: 'success',
+                message: 'deleted successfully'
+            });
+        }catch(e){
+            let msg = e.message;
+            let statusCode = 400;
+
+            if(msg == 'jwt must be provided'){
+                msg = 'jwt is not provided';
+            }else if(msg == 'jwt expired'){
+                msg = 'you logged in time expired, please login again';
+            }else if(msg == 'invalid token'){
+                msg = 'the token you provided is not valid';
+            }else if(msg == 'jwt malformed'){
+                msg = 'wrong token form';
+            }else{
+                msg = 'something went wrong, please try again later';
+                statusCode = 500;
             }
 
             const err = new CustomError(msg, statusCode);

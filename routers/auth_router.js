@@ -16,8 +16,8 @@ router.route('/signin')
 // router.route('/reset_password')
 //     .patch()
 
-// router.route('/delete_me')
-//     .delete()
+router.route('/delete_me')
+    .delete(auth.deleteMe)
 
 router.route('/update_detailes')
     .patch(auth.update_user_info)
