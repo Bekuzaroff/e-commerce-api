@@ -10,17 +10,30 @@ class Auth_controller{
         });
     }
     async sign_up(req, res, next) {
-        let user = await User.create(req.body);
-        let token = Auth_controller.sign_jwt(user._id);
+        try{
+            let user = await User.create(req.body);
+            let token = Auth_controller.sign_jwt(user._id);
 
-        res.cookie('jwt', token, {
-            maxAge: process.env.JWT_EXPIRES,
-        });
+            res.cookie('jwt', token, {
+                maxAge: process.env.JWT_EXPIRES,
+            });
 
-        res.status(201).json({
-            status: 'success',
-            token
-        })
+            res.status(201).json({
+                status: 'success',
+                token
+            })
+        }catch(e){
+            let msg = e.message;
+            let statusCode = 400;
+
+            if(msg.includes('user validation failed')){
+                statusCode = 400;
+            }
+
+            const err = new CustomError(e.message, statusCode);
+            next(err);
+        }
+        
             
     }
 
@@ -71,8 +84,17 @@ class Auth_controller{
                 data: await User.findOne({_id: id})
             })
         }catch(e){
-            let err = new CustomError(e.message, 400);
-            return next(err);
+            let msg = e.message;
+            let statusCode = 400;
+
+            if(msg == 'jwt expired'){
+                statusCode = 400;
+                msg = 'you logged in time expired, please login again'
+                console.log(msg)
+            }
+
+            const err = new CustomError(msg, statusCode);
+            next(err);
         }
     }
 }
