@@ -17,9 +17,9 @@ router.route('/signin')
 //     .patch()
 
 router.route('/delete_me')
-    .delete(auth.deleteMe)
+    .delete(auth.protect, auth.deleteMe)
 
 router.route('/update_detailes')
-    .patch(auth.update_user_info)
+    .patch(auth.protect, auth.update_user_info)
 
 module.exports = router;
