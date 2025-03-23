@@ -3,6 +3,8 @@ const router = require('./routers/auth_router');
 const limiter = require('express-rate-limit');
 const hpp = require('hpp');
 const helmet = require('helmet');
+const sanitizer = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.use(limiter({
     message: 'too many calls from this ip address, try again later'
 }));
 app.use(hpp());
+app.use(sanitizer());
+app.use(xss());
 
 app.use(express.json({limit: '10kb'}));
 
