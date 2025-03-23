@@ -67,14 +67,16 @@ class Auth_controller{
     }
     async update_user_info(req, res, next) {
         try{
-            const token = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
-            const id = token.id;
-    
-            await User.updateOne({_id: id}, req.body);
-    
+            let user = req.user;
+            await User.updateOne({_id: user.id}, req.body);
+
+            if(!user){
+                const err = new CustomError('you are not logged in', 400);
+                next(err);
+            }
             res.status(200).json({
                 status: 'success',
-                data: await User.findOne({_id: id})
+                data: await User.findOne({_id: user.id})
             })
         }catch(e){
             const err = new CustomError(e.message, 400);
@@ -84,22 +86,38 @@ class Auth_controller{
 
     async deleteMe(req, res, next) {
         try{
-            let token = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
-            let id = token.id;
-
-            let user = await User.findOne({_id: id});
+            let user = req.user;
 
             if(!user){
-                let err = new CustomError('this user does not exist', 404);
+                let err = new CustomError('you are not logged in', 404);
                 return next(err);
             }
 
-            await User.deleteOne({_id: id});
+            await User.deleteOne({_id: user.id});
 
             res.status(200).json({
                 status: 'success',
                 message: 'deleted successfully'
             });
+        }catch(e){
+            const err = new CustomError(e.message, 400);
+            next(err);
+        }
+    }
+
+    async protect(req, res, next){
+        try{
+            let jwt = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
+
+            const user = await User.findById(jwt.id);
+
+            if(!user){
+                const err = new CustomError('this user does not exist', 404);
+                next(err);
+            }
+
+            req.user = user;
+            next();
         }catch(e){
             const err = new CustomError(e.message, 400);
             next(err);
