@@ -2,9 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-
+const product = require('./../models/pro')
 const app = express();
-
 
 dotenv.config({path: './main.env'});
 
