@@ -30,13 +30,17 @@ const user_schema = mongoose.Schema({
             },
             message: 'your passwords do not match'
         }
-    }
+    },
+    password_changed_at: Date
 });
 
 user_schema.methods.right_password = async function(pass, db_pass){
     return await bcrypt.compare(pass, db_pass);
 }
-
+user_schema.methods.password_changed_after_jwt = async function (jwt_exp) {
+    if(!this.password_changed_at) return false
+    return parseInt(this.password_changed_at.getTime() / 1000, 10) > jwt_exp;
+}
 //schema middlewares
 
 user_schema.pre('save', async function(){
