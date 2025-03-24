@@ -1,0 +1,44 @@
+[
+    {
+        "name": "nike air force 1",
+        "image": "./images/i1.jpg",
+        "colors": ["white", "black", "green"],
+        "price": 40.99,
+        "currency": "$"
+    },
+    {
+        "name": "nike air jordan 1",
+        "image": "./images/i2.jpg",
+        "colors": ["black", "red", "grey"],
+        "price": 30.99,
+        "currency": "$"
+    },
+    {
+        "name": "jordan 11",
+        "image": "./images/i3.jpg",
+        "colors": ["white", "black", "green"],
+        "price": 90.99,
+        "currency": "$"
+    },
+    {
+        "name": "jordan 4",
+        "image": "./images/i4.jpg",
+        "colors": ["white", "black", "green"],
+        "price": 60.99,
+        "currency": "$"
+    },
+    {
+        "name": "nike air max 97",
+        "image": "./images/i5.jpg",
+        "colors": ["grey"],
+        "price": 40.99,
+        "currency": "$"
+    },
+    {
+        "name": "nike xx9",
+        "image": "./images/i6.jpg",
+        "colors": ["white", "black", "green"],
+        "price": 40.99,
+        "currency": "$"
+    }
+]
