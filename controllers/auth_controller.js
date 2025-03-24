@@ -115,6 +115,11 @@ class Auth_controller{
                 const err = new CustomError('this user does not exist', 404);
                 next(err);
             }
+            if(await user.password_changed_after_jwt(jwt.iat)){
+                const err = new CustomError('your password was changed recently after you logged in, please, login again', 400);
+                next(err);
+            }
+            
 
             req.user = user;
             next();
