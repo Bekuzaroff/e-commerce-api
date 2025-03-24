@@ -33,6 +33,8 @@ app.use(express.json({limit: '10kb'}));
 app.use('/api/v1/auth', router);
 app.use(error_handle);
 
+app.use(express.static('./images'))
+
 module.exports = app;
 
 

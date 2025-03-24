@@ -17,8 +17,7 @@ app.listen(PORT, '127.0.0.1', () => {
     console.log('start server')
 });
 
-
-if(process.env.NODE_ENV === 'development'){
+if(process.env.NODE_ENV === 'production'){
     Product.insertMany(JSON.parse(fs.readFileSync('./dev_data/products.json', 'utf-8')))
         .then((value) => console.log('products added successfully'))
         .catch((e) => console.log(e.message));
