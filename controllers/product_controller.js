@@ -1,4 +1,4 @@
-const CustomError = require('../utils/custom_error');
+const ApiError = require('../utils/api_error');
 const Product = require('./../models/product');
 
 class Product_controller{
@@ -10,9 +10,8 @@ class Product_controller{
                 status: 'success',
                 data: products
             })
-        }catch(e){
-            const err = new CustomError(e.message);
-            next(err);
+        }catch(err){
+            next(ApiError.internal(err.message));
         }
     }
 }

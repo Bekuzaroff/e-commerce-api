@@ -1,7 +1,7 @@
 const User = require('./../models/user');
 const jsonwebtoken = require('jsonwebtoken');
 const util = require('util');
-const CustomError = require('.././utils/custom_error');
+const ApiError = require('../utils/api_error');
 
 class Auth_controller{
     static sign_jwt(id) {
@@ -22,25 +22,27 @@ class Auth_controller{
                 status: 'success',
                 token
             })
-        }catch(e){
-            const err = new CustomError(e.message);
-            next(err);
+        }catch(err){
+            if(err.name == 'ValidationError'){
+                const messages = Object.values(err.errors).map(val => val.message);
+                return next(ApiError.badRequest(messages));
+            }else if(err.name == 'MongoServerError'){
+                return next(ApiError.badRequest('this user already exists'));
+            }
         }
-        
-            
+         
     }
 
     async sign_in(req, res, next) {
-        const {email, password} = req.body;
+        try{
+            const {email, password} = req.body;
         let user = await User.findOne({email});
 
-        if(!user){
-            let err = new CustomError('user with such email does not exist');
-            return next(err);
+        if(!user){;
+            return next(ApiError.notFound('user with such email does not exist'));
         }
         if(!(await user.right_password(password, user.password))){
-            let err = new CustomError('wrong password');
-            return next(err);
+            return next(ApiError.badRequest('wrong password'));
         }
 
         let token = Auth_controller.sign_jwt(user._id);
@@ -53,6 +55,9 @@ class Auth_controller{
             status: 'success',
             token
         })
+        }catch(err){
+            return next(ApiError.internal(err.message));
+        }
 
     }
     async update_user_info(req, res, next) {
@@ -61,16 +66,14 @@ class Auth_controller{
             await User.updateOne({_id: user.id}, req.body);
 
             if(!user){
-                const err = new CustomError('you are not logged in');
-                next(err);
+                return next(ApiError.notFound('you are not logged in'));
             }
             res.status(200).json({
                 status: 'success',
                 data: await User.findOne({_id: user.id})
             })
-        }catch(e){
-            const err = new CustomError(e.message);
-            next(err);
+        }catch(err){
+            return next(ApiError.internal(err.message));
         }
     }
 
@@ -79,8 +82,7 @@ class Auth_controller{
             let user = req.user;
 
             if(!user){
-                let err = new CustomError('you are not logged in', 404);
-                return next(err);
+                return next(ApiError.notFound('you are not logged in'));
             }
 
             await User.deleteOne({_id: user.id});
@@ -89,9 +91,8 @@ class Auth_controller{
                 status: 'success',
                 message: 'deleted successfully'
             });
-        }catch(e){
-            const err = new CustomError(e.message);
-            next(err);
+        }catch(err){
+            return next(ApiError.internal(err.message));
         }
     }
 
@@ -102,20 +103,19 @@ class Auth_controller{
             const user = await User.findById(jwt.id);
 
             if(!user){
-                const err = new CustomError('this user does not exist', 404);
-                next(err);
+                return next(ApiError.badRequest('this user does not exist'));
             }
             if(await user.password_changed_after_jwt(jwt.iat)){ 
-                const err = new CustomError('your password was changed recently after you logged in, please, login again', 400);
-                next(err);
+                return next(ApiError.badRequest('your password was changed recently after you logged in, please, login again'));
             }
             
-
             req.user = user;
             next();
-        }catch(e){
-            const err = new CustomError(e.message);
-            next(err);
+        }catch(err){
+            if(err.name == 'TokenExpiredError' || err.name == 'JsonWebTokenError'){
+                return next(ApiError.badRequest(err.message));
+            }
+            return next(ApiError.internal(err.message));
         }
     }
 }
