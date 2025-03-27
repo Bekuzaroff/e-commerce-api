@@ -11,7 +11,7 @@ class Product_controller{
                 data: products
             })
         }catch(e){
-            let err = new CustomError(e.message, 500);
+            const err = new CustomError(e.message);
             next(err);
         }
     }

@@ -23,17 +23,7 @@ class Auth_controller{
                 token
             })
         }catch(e){
-            let msg = e.message;
-            let statusCode = 400;
-
-            if(msg.includes('user validation failed')){
-                statusCode = 400;
-            }else{
-                statusCode = 500;
-                msg = 'something went wrong';
-            }
-
-            const err = new CustomError(e.message, statusCode);
+            const err = new CustomError(e.message);
             next(err);
         }
         
@@ -45,11 +35,11 @@ class Auth_controller{
         let user = await User.findOne({email});
 
         if(!user){
-            let err = new CustomError('user with such email does not exist', 404);
+            let err = new CustomError('user with such email does not exist');
             return next(err);
         }
         if(!(await user.right_password(password, user.password))){
-            let err = new CustomError('wrong password', 400);
+            let err = new CustomError('wrong password');
             return next(err);
         }
 
@@ -71,7 +61,7 @@ class Auth_controller{
             await User.updateOne({_id: user.id}, req.body);
 
             if(!user){
-                const err = new CustomError('you are not logged in', 400);
+                const err = new CustomError('you are not logged in');
                 next(err);
             }
             res.status(200).json({
@@ -79,7 +69,7 @@ class Auth_controller{
                 data: await User.findOne({_id: user.id})
             })
         }catch(e){
-            const err = new CustomError(e.message, 400);
+            const err = new CustomError(e.message);
             next(err);
         }
     }
@@ -100,7 +90,7 @@ class Auth_controller{
                 message: 'deleted successfully'
             });
         }catch(e){
-            const err = new CustomError(e.message, 400);
+            const err = new CustomError(e.message);
             next(err);
         }
     }
@@ -124,7 +114,7 @@ class Auth_controller{
             req.user = user;
             next();
         }catch(e){
-            const err = new CustomError(e.message, 400);
+            const err = new CustomError(e.message);
             next(err);
         }
     }

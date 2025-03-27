@@ -10,9 +10,39 @@ const product_router = require('./routers/product_router')
 const app = express();
 
 let error_handle = (err, req, res, next) => {
-    res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message
+    let status = 'fail';
+    let fields = ['user_name', 'email', 'password'];
+
+    let statusCode = 400;;
+    let msg = err.message;
+    
+    if(msg.includes('validation')){
+        
+
+        let k = 0;
+
+        while(k != fields.length){
+
+            if(!msg.includes(fields[k])){
+                fields.splice(k, 1);
+                continue;
+            }
+
+            k += 1;
+        }
+
+        if(msg.includes('your passwords do not match')){
+            msg = 'your passwords do not match';
+        }else{
+            msg = `wrong ${fields}`;
+        }
+
+    }else if(msg.includes('duplicate key error')){
+        msg = 'this user already exists, please, login';
+    }
+    res.status(statusCode).json({
+        status: status,
+        message: msg
     });
     next();
 }
