@@ -19,6 +19,9 @@ router.route('/signin')
 router.route('/delete_me')
     .delete(auth.protect, auth.deleteMe)
 
+router.route('/logout')
+    .post(auth.protect, auth.log_out)
+
 router.route('/update_detailes')
     .patch(auth.protect, auth.update_user_info)
 

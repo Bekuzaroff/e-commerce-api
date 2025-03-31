@@ -140,6 +140,25 @@ class Auth_controller{
             return next(ApiError.internal(err.message));
         }
     }
+    async log_out(req, res, next){
+        try{
+            const user = req.user;
+
+            if(!user){
+                return next(ApiError.notFound('you are not logged in'));
+            }
+
+            user.password_changed_at = Date.now();
+            user.save();
+
+            res.status(200).json({
+                status: 'success',
+                message: 'logged out successfully'
+            });
+        }catch(err){
+            return next(ApiError.internal(err.message));
+        }
+    }
 
     async protect(req, res, next){
         try{
@@ -151,7 +170,7 @@ class Auth_controller{
                 return next(ApiError.badRequest('this user does not exist'));
             }
             if(await user.password_changed_after_jwt(jwt.iat)){ 
-                return next(ApiError.badRequest('your password was changed recently after you logged in, please, login again'));
+                return next(ApiError.badRequest('you are logged out or changed password after you logged in, please, login again'));
             }
             
             req.user = user;
