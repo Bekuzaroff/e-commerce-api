@@ -22,4 +22,7 @@ router.route('/delete_me')
 router.route('/update_detailes')
     .patch(auth.protect, auth.update_user_info)
 
+router.route('/update_password')
+    .patch(auth.protect, auth.update_password)
+
 module.exports = router;

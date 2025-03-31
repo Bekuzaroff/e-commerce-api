@@ -89,6 +89,39 @@ class Auth_controller{
         }
     }
 
+    async update_password(req, res, next) {
+        try{
+            const user = req.user;
+
+            let old_pass = req.body.old_password;
+            let new_pass = req.body.new_password;
+            let confirm_new_pass = req.body.confirm_password;
+
+            if(!await(user.right_password(old_pass, user.password))){
+                return next(ApiError.badRequest('wrong actual password'));
+            }
+
+            if(new_pass !== confirm_new_pass){
+                return next(ApiError.badRequest('your passwords do not match'));
+            }
+
+            user.password = new_pass;
+            user.save();
+
+            res.status(200).json({
+                status: 'success',
+                data: await User.findOne({_id: user.id})
+            })
+            
+        }catch(err){
+            if(err.name == 'TokenExpiredError' || err.name == 'JsonWebTokenError'){
+                return next(ApiError.badRequest(err.message));
+            }
+            return next(ApiError.internal(err.message));
+        }
+        
+    }
+
     async deleteMe(req, res, next) {
         try{
             let user = req.user;
