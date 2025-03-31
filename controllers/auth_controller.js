@@ -2,6 +2,7 @@ const User = require('./../models/user');
 const jsonwebtoken = require('jsonwebtoken');
 const util = require('util');
 const ApiError = require('../utils/api_error');
+const validator = require('validator');
 
 class Auth_controller{
     static sign_jwt(id) {
@@ -62,7 +63,18 @@ class Auth_controller{
     }
     async update_user_info(req, res, next) {
         try{
+
             let user = req.user;
+
+            if(req.body.password){
+                return next(ApiError.badRequest('to change your password, use path: "/update_password" '))
+            }
+            if(req.body.email){
+                if(!validator.isEmail(req.body.email)){
+                    return next(ApiError.badRequest('wrong email'));
+                }
+            }
+
             await User.updateOne({_id: user.id}, req.body);
 
             if(!user){
