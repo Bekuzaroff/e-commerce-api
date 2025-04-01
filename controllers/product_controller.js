@@ -57,7 +57,24 @@ class Product_controller{
     }
 
     async delete_product(req, res, next) {
-        
+        try{
+            const product = await Product.findByIdAndDelete(req.query.id);
+
+            if(!product){
+                return next(ApiError.badRequest(`product with id "${req.query.id}" does not exist`))
+            }
+            
+            res.status(200).json({
+                status: 'success',
+                message: 'deleted successfully'
+            })
+
+        }catch(err){
+            if(err.name === 'CastError'){
+                return next(ApiError.badRequest('wrong id cast'));
+            }
+            return next(ApiError.internal(err.message));
+        }
     }
 }
 module.exports = Product_controller;

@@ -9,6 +9,6 @@ router.route('')
     .get(auth.protect, controller.get_all_products)
     .post(auth.protect, auth.isAdmin, controller.add_product)
     .patch(auth.protect, auth.isAdmin, controller.update_product)
-//     .delete()
+    .delete(auth.protect, auth.isAdmin, controller.delete_product);
 
 module.exports = router;
