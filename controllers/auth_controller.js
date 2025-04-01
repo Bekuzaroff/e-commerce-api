@@ -65,7 +65,19 @@ class Auth_controller{
         try{
 
             let user = req.user;
+            let non_existing_field = null;
+            const fields = ["user_name", "email", "password"];
+            
+            Object.keys(req.body).forEach((val) => {
+                if(!fields.includes(val)){
+                    non_existing_field = val;
+                }
+            });
 
+            if(non_existing_field){
+                return next(ApiError.badRequest(`non existing field: ${non_existing_field}`))
+            }
+            
             if(req.body.password){
                 return next(ApiError.badRequest('to change your password, use path: "/update_password" '))
             }
@@ -96,6 +108,17 @@ class Auth_controller{
             let old_pass = req.body.old_password;
             let new_pass = req.body.new_password;
             let confirm_new_pass = req.body.confirm_password;
+            let non_existing_field = null;
+
+            Object.keys(req.body).forEach((val) => {
+                if(!fields.includes(val)){
+                    non_existing_field = val;
+                }
+            });
+
+            if(non_existing_field){
+                return next(ApiError.badRequest(`non existing field: ${non_existing_field}`))
+            }
 
             if(!await(user.right_password(old_pass, user.password))){
                 return next(ApiError.badRequest('wrong actual password'));
