@@ -32,5 +32,32 @@ class Product_controller{
             }
           }
     }
+
+    async update_product(req, res, next) {
+        try{
+            const product = await Product.findById(req.query.id);
+
+            if(!product){
+                return next(ApiError.badRequest(`product with id "${req.query.id}" does not exist`))
+            }
+
+            await Product.updateOne({_id: req.query.id}, req.body);
+            
+            res.status(200).json({
+                status: 'success',
+                message: 'update successfully'
+            })
+
+        }catch(err){
+            if(err.name === 'CastError'){
+                return next(ApiError.badRequest('wrong id cast'));
+            }
+            return next(ApiError.internal(err.message));
+        }
+    }
+
+    async delete_product(req, res, next) {
+        
+    }
 }
 module.exports = Product_controller;
