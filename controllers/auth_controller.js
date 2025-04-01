@@ -173,7 +173,8 @@ class Auth_controller{
             return next(ApiError.internal(err.message));
         }
     }
-    async log_out(req, res, next){
+
+    async log_out(req, res, next) {
         try{
             const user = req.user;
 
@@ -193,7 +194,7 @@ class Auth_controller{
         }
     }
 
-    async protect(req, res, next){
+    async protect(req, res, next) {
         try{
             let jwt = await util.promisify(jsonwebtoken.verify)(req.headers.jwt, process.env.JWT_SECRET_KEY);
 
@@ -213,6 +214,20 @@ class Auth_controller{
                 return next(ApiError.badRequest(err.message));
             }
             return next(ApiError.internal(err.message));
+        }
+    }
+
+    async isAdmin(req, res, next) {
+        try{
+            let user = req.user;
+
+            if(user.role === 'admin'){
+                return next();
+            }
+
+            throw ApiError.badRequest('you are not allowed to add/update/delete products');
+        }catch(err){
+            return next(err);
         }
     }
 }

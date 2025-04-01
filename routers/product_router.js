@@ -7,7 +7,7 @@ const auth = new Auth_controller();
 
 router.route('')
     .get(auth.protect, controller.get_all_products)
-//     .post()
+    .post(auth.protect, auth.isAdmin, controller.add_product)
 //     .patch()
 //     .delete()
 
