@@ -12,6 +12,16 @@ class Auth_controller{
     }
     async sign_up(req, res, next) {
         try{
+            req.body.role = 'user';
+
+            if(req.params.admin_token){
+                if(req.params.admin_token === process.env.ADMIN_TOKEN){
+                    req.body.role = 'admin';
+                }else{
+                    return next(ApiError.badRequest("admin token is wrong"));
+                }
+            }
+            
             let user = await User.create(req.body);
             let token = Auth_controller.sign_jwt(user._id);
 

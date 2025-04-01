@@ -4,7 +4,7 @@ const Auth_controller = require('./../controllers/auth_controller');
 const router = express.Router();
 const auth = new Auth_controller();
 
-router.route('/signup')
+router.route('/signup/:admin_token*?')
     .post(auth.sign_up)
 
 router.route('/signin')

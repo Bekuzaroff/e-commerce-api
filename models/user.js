@@ -31,7 +31,12 @@ const user_schema = mongoose.Schema({
             message: 'your passwords do not match'
         }
     },
-    password_changed_at: Date
+    password_changed_at: Date,
+    role: {
+        type: String,
+        enum: ['admin', 'user'],
+        required: true
+    }
 });
 
 user_schema.methods.right_password = async function(pass, db_pass){
