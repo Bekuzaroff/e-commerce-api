@@ -35,13 +35,11 @@ class Product_controller{
 
     async update_product(req, res, next) {
         try{
-            const product = await Product.findById(req.query.id);
+            const product = await Product.findByIdAndUpdate({_id: req.params.id}, req.body);
 
             if(!product){
                 return next(ApiError.badRequest(`product with id "${req.query.id}" does not exist`))
             }
-
-            await Product.updateOne({_id: req.query.id}, req.body);
             
             res.status(200).json({
                 status: 'success',
