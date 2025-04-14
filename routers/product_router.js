@@ -5,7 +5,7 @@ const Product_controller = require('./../controllers/product_controller');
 const controller = new Product_controller();
 const auth = new Auth_controller();
 
-router.route('')
+router.route('/:id*?')
     .get(auth.protect, controller.get_all_products)
     .post(auth.protect, auth.isAdmin, controller.add_product)
     .patch(auth.protect, auth.isAdmin, controller.update_product)
