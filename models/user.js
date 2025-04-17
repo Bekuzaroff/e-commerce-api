@@ -36,6 +36,10 @@ const user_schema = mongoose.Schema({
         type: String,
         enum: ['admin', 'user'],
         required: true
+    },
+    cart: {
+        type: [Object],
+        required: true
     }
 });
 

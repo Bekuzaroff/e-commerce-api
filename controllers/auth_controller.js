@@ -4,6 +4,8 @@ const util = require('util');
 const ApiError = require('../utils/api_error');
 const validator = require('validator');
 
+const Product = require('./../models/product');
+
 class Auth_controller{
     static sign_jwt(id) {
         return jsonwebtoken.sign({id}, process.env.JWT_SECRET_KEY, {
@@ -13,6 +15,7 @@ class Auth_controller{
     async sign_up(req, res, next) {
         try{
             req.body.role = 'user';
+            req.body.cart = [];
 
             if(req.params.admin_token){
                 if(req.params.admin_token === process.env.ADMIN_TOKEN){
@@ -229,6 +232,43 @@ class Auth_controller{
         }catch(err){
             return next(err);
         }
+    }
+
+    async add_product_to_cart(req, res, next){
+        try{
+            let user = req.user;
+
+            if(user.role !== 'user'){
+                return next(ApiError.badRequest('Shop admins can not add products to carts'));
+            }
+
+            let product = await Product.findById(req.body._id);
+
+            if(!product){
+                return next(ApiError.badRequest('this product does not exist'));
+            }
+
+            const product_already_exists = user.cart.find((value) => {
+                return value._id == req.body._id;
+            });
+
+            if(product_already_exists){
+                return next(ApiError.badRequest('this product is already in your cart'));
+            }
+
+            user.cart.push(product);
+            user.save();
+
+            res.status(200).json({
+                status: 'success',
+                message: 'added to cart successfully'
+            })
+
+        }catch(e){
+            return next(ApiError.internal(e.message));
+        }
+        
+
     }
 }
 module.exports = Auth_controller;
