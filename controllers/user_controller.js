@@ -1,12 +1,14 @@
-const User = require('./../models/user');
+const User = require('../models/user');
 const jsonwebtoken = require('jsonwebtoken');
+const Product = require('../models/product');
+
 const util = require('util');
-const ApiError = require('../utils/api_error');
 const validator = require('validator');
 
-const Product = require('./../models/product');
+const ApiError = require('../utils/api_error');
 
-class Auth_controller{
+
+class User_controller{
     static sign_jwt(id) {
         return jsonwebtoken.sign({id}, process.env.JWT_SECRET_KEY, {
             expiresIn: process.env.JWT_EXPIRES
@@ -26,7 +28,7 @@ class Auth_controller{
             }
             
             let user = await User.create(req.body);
-            let token = Auth_controller.sign_jwt(user._id);
+            let token = User_controller.sign_jwt(user._id);
 
             res.cookie('jwt', token, {
                 maxAge: process.env.JWT_EXPIRES,
@@ -59,7 +61,7 @@ class Auth_controller{
             return next(ApiError.badRequest('wrong password'));
         }
 
-        let token = Auth_controller.sign_jwt(user._id);
+        let token = User_controller.sign_jwt(user._id);
 
         res.cookie('jwt', token, {
             maxAge: process.env.JWT_EXPIRES,
@@ -239,7 +241,7 @@ class Auth_controller{
             let user = req.user;
 
             if(user.role !== 'user'){
-                return next(ApiError.badRequest('Shop admins can not add products to carts'));
+                return next(ApiError.badRequest('E-Shop admins can not add products to carts'));
             }
 
             let product = await Product.findById(req.body._id);
@@ -267,8 +269,8 @@ class Auth_controller{
         }catch(e){
             return next(ApiError.internal(e.message));
         }
-        
-
     }
+
+    
 }
-module.exports = Auth_controller;
+module.exports = User_controller;
