@@ -271,6 +271,36 @@ class User_controller{
         }
     }
 
+    async delete_products_from_cart(req, res, next){
+        const cart = req.user.cart;
+        const products = req.body; /* array with objects to delete:
+            [
+            {_id: "67e1485e8dfe1d6320d586d9"},
+            {_id: "67e1485e8dfe1d6320d586d9"},
+            {_id: "67e1485e8dfe1d6320d586d9"}
+            ]
+         */
+        let k = 0;
+
+        while(k !== products.length){
+            for(let i = 0; i < cart.length; i++){
+                if(cart[i]._id != products[k]._id){
+                    continue;
+                }
+
+                cart.splice(i, 1);
+            }
+            k++;
+        }
+
+        req.user.save();
+
+        res.status(200).json({
+            status: 'success',
+            message: 'deleted from cart successfully'
+        });
+    }
+
     
 }
 module.exports = User_controller;
