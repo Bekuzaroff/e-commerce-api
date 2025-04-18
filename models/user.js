@@ -42,16 +42,19 @@ const user_schema = mongoose.Schema({
         required: true
     }
 });
-
+//schema method for checking equality of to bcrypted passwords
 user_schema.methods.right_password = async function(pass, db_pass){
     return await bcrypt.compare(pass, db_pass);
 }
+
+//schema method for checking if password changed after user logged in (jwt)
 user_schema.methods.password_changed_after_jwt = async function (jwt_exp) {
     if(!this.password_changed_at) return false
     return parseInt(this.password_changed_at.getTime() / 1000, 10) > jwt_exp;
 }
 //schema middlewares
 
+//bcrypting password before save user into db
 user_schema.pre('save', async function(){
     this.password = await bcrypt.hash(this.password, 10);
     this.confirm_password = undefined;

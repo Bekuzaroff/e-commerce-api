@@ -24,7 +24,7 @@ router.route('/delete_me')
 router.route('/logout')
     .post(user_controller.protect, user_controller.log_out);
 
-router.route('/update_detailes')
+router.route('/update_details')
     .patch(user_controller.protect, user_controller.update_user_info);
 
 router.route('/update_password')

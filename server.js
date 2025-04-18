@@ -17,6 +17,7 @@ app.listen(PORT, '127.0.0.1', () => {
     console.log('start server')
 });
 
+//adding into db basic set of products
 if(process.env.NODE_ENV === 'production'){
     Product.insertMany(JSON.parse(fs.readFileSync('./dev_data/products.json', 'utf-8')))
         .then((value) => console.log('products added successfully'))

@@ -9,27 +9,35 @@ const ApiError = require('../utils/api_error');
 
 
 class User_controller{
+    /* function returns jwt token already signed with param "id" inside*/
     static sign_jwt(id) {
         return jsonwebtoken.sign({id}, process.env.JWT_SECRET_KEY, {
             expiresIn: process.env.JWT_EXPIRES
         });
     }
+
     async sign_up(req, res, next) {
         try{
+            //give default role to usual user (not admin)
             req.body.role = 'user';
             req.body.cart = [];
 
+            //if user provided admin's token
             if(req.params.admin_token){
+                //and if it is equal to env variable admin token
                 if(req.params.admin_token === process.env.ADMIN_TOKEN){
+                    //we make this user admin, he able to create/update/delete products
                     req.body.role = 'admin';
+                    req.body.cart = undefined; // admin can not have a cart
                 }else{
-                    return next(ApiError.badRequest("admin token is wrong"));
+                    return next(ApiError.badRequest("admin token is wrong")); /* in case user
+                    tried to enter wrong admin token */
                 }
             }
-            
             let user = await User.create(req.body);
-            let token = User_controller.sign_jwt(user._id);
+            let token = User_controller.sign_jwt(user._id); // put user's id inside of token by function we made
 
+            
             res.cookie('jwt', token, {
                 maxAge: process.env.JWT_EXPIRES,
             });
@@ -51,7 +59,7 @@ class User_controller{
 
     async sign_in(req, res, next) {
         try{
-            const {email, password} = req.body;
+        const {email, password} = req.body;
         let user = await User.findOne({email});
 
         if(!user){;
@@ -61,7 +69,7 @@ class User_controller{
             return next(ApiError.badRequest('wrong password'));
         }
 
-        let token = User_controller.sign_jwt(user._id);
+        let token = User_controller.sign_jwt(user._id) // put user's id inside of token by function we made; 
 
         res.cookie('jwt', token, {
             maxAge: process.env.JWT_EXPIRES,
@@ -80,17 +88,21 @@ class User_controller{
         try{
 
             let user = req.user;
-            let non_existing_field = null;
-            const fields = ["user_name", "email", "password"];
-            
+            let non_existing_fields = [];
+            const allowed_fields = ["user_name", "email", "password"];
+
+            /* algorythm:  go through the whole keys of object body from client,
+            check if allowed fields contain every from them. If not, we add one, which
+             is not allowed, to list (non_existing_fields) to show it to the client later
+                 */
             Object.keys(req.body).forEach((val) => {
-                if(!fields.includes(val)){
-                    non_existing_field = val;
+                if(!allowed_fields.includes(val)){
+                    non_existing_fields.push(val);
                 }
             });
 
-            if(non_existing_field){
-                return next(ApiError.badRequest(`non existing field: ${non_existing_field}`))
+            if(non_existing_fields.length > 0){
+                return next(ApiError.badRequest(`non existing field: ${non_existing_fields}`))
             }
             
             if(req.body.password){
@@ -120,19 +132,23 @@ class User_controller{
         try{
             const user = req.user;
 
-            let old_pass = req.body.old_password;
-            let new_pass = req.body.new_password;
-            let confirm_new_pass = req.body.confirm_password;
-            let non_existing_field = null;
+            const old_pass = req.body.old_password;
+            const new_pass = req.body.new_password;
+            const confirm_new_pass = req.body.confirm_password;
+            let non_existing_fields = [];
 
+            /* algorythm:  go through the whole keys of object body from client,
+            check if allowed fields contain every from them. If not, we add one, which
+             is not allowed, to list (non_existing_fields) to show it to the client later
+                 */
             Object.keys(req.body).forEach((val) => {
                 if(!fields.includes(val)){
-                    non_existing_field = val;
+                    non_existing_fields.push(val);
                 }
             });
 
-            if(non_existing_field){
-                return next(ApiError.badRequest(`non existing field: ${non_existing_field}`))
+            if(non_existing_fields.length > 0){
+                return next(ApiError.badRequest(`non existing field: ${non_existing_fields}`))
             }
 
             if(!await(user.right_password(old_pass, user.password))){
@@ -187,6 +203,8 @@ class User_controller{
                 return next(ApiError.notFound('you are not logged in'));
             }
 
+            /* every time user logs in we check if jwt token expired time
+            is more than date when user changed his password*/
             user.password_changed_at = Date.now();
             user.save();
 
@@ -212,7 +230,7 @@ class User_controller{
                 return next(ApiError.badRequest('you are logged out or changed password after you logged in, please, login again'));
             }
             
-            req.user = user;
+            req.user = user //give a user object to next middlewares if no errors;
             next();
         }catch(err){
             if(err.name == 'TokenExpiredError' || err.name == 'JsonWebTokenError'){
@@ -222,6 +240,7 @@ class User_controller{
         }
     }
 
+    //middleware checks if user is admin for admin operations
     async isAdmin(req, res, next) {
         try{
             let user = req.user;
@@ -250,6 +269,7 @@ class User_controller{
                 return next(ApiError.badRequest('this product does not exist'));
             }
 
+            //if user already added current product to his cart
             const product_already_exists = user.cart.find((value) => {
                 return value._id == req.body._id;
             });
@@ -282,6 +302,8 @@ class User_controller{
          */
         let k = 0;
 
+        /*check products ids from body and compare them with ids in cart
+        if we found product in cart, we delete it*/
         while(k !== products.length){
             for(let i = 0; i < cart.length; i++){
                 if(cart[i]._id != products[k]._id){

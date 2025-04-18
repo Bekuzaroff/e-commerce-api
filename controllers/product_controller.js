@@ -25,6 +25,7 @@ class Product_controller{
 
           }catch(err){
             if(err.name == 'ValidationError'){
+                //join all the error messages to show all of them
                 const messages = Object.values(err.errors).map(val => val.message);
                 return next(ApiError.badRequest(messages));
             }else if(err.name == 'MongoServerError'){
