@@ -20,7 +20,7 @@ let error_handle = (err, req, res, next) => {
 //security
 app.use(helmet());
 app.use(limiter({
-    max: 20,
+    max: 1000,
     windowMs: 60 * 60 * 1000,
     message: 'too many calls from this ip address, try again later'
 }));

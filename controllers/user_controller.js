@@ -6,6 +6,7 @@ const util = require('util');
 const validator = require('validator');
 
 const ApiError = require('../utils/api_error');
+const Helper = require('./../utils/helper');
 
 
 class User_controller{
@@ -42,10 +43,7 @@ class User_controller{
                 maxAge: process.env.JWT_EXPIRES,
             });
 
-            res.status(201).json({
-                status: 'success',
-                token
-            })
+            Helper.sendResponse(res, 201, 'success', token);
         }catch(err){
             if(err.name == 'ValidationError'){
                 const messages = Object.values(err.errors).map(val => val.message);
@@ -75,10 +73,8 @@ class User_controller{
             maxAge: process.env.JWT_EXPIRES,
         });
 
-        res.status(201).json({
-            status: 'success',
-            token
-        })
+        Helper.sendResponse(res, 200, 'success', token);
+
         }catch(err){
             return next(ApiError.internal(err.message));
         }
@@ -114,15 +110,12 @@ class User_controller{
                 }
             }
 
-            await User.updateOne({_id: user.id}, req.body);
+            await User.findByIdAndUpdate({_id: user.id}, req.body);
 
             if(!user){
                 return next(ApiError.notFound('you are not logged in'));
             }
-            res.status(200).json({
-                status: 'success',
-                data: await User.findOne({_id: user.id})
-            })
+            Helper.sendResponse(res, 200, 'success', "updated successfully");
         }catch(err){
             return next(ApiError.internal(err.message));
         }
@@ -162,10 +155,8 @@ class User_controller{
             user.password = new_pass;
             user.save();
 
-            res.status(200).json({
-                status: 'success',
-                data: await User.findOne({_id: user.id})
-            })
+            Helper.sendResponse(res, 200, 'success', await User.findOne({_id: user.id}));
+
             
         }catch(err){
             if(err.name == 'TokenExpiredError' || err.name == 'JsonWebTokenError'){
@@ -208,10 +199,8 @@ class User_controller{
             user.password_changed_at = Date.now();
             user.save();
 
-            res.status(200).json({
-                status: 'success',
-                message: 'logged out successfully'
-            });
+            Helper.sendResponse(res, 200, 'success', "logged out successfully");
+
         }catch(err){
             return next(ApiError.internal(err.message));
         }
@@ -281,10 +270,7 @@ class User_controller{
             user.cart.push(product);
             user.save();
 
-            res.status(200).json({
-                status: 'success',
-                message: 'added to cart successfully'
-            })
+            Helper.sendResponse(res, 200, 'success', "added to cart successfully");
 
         }catch(e){
             return next(ApiError.internal(e.message));
@@ -317,10 +303,8 @@ class User_controller{
 
         req.user.save();
 
-        res.status(200).json({
-            status: 'success',
-            message: 'deleted from cart successfully'
-        });
+        Helper.sendResponse(res, 200, 'success', "deleted from cart successfully");
+
     }
 
     

@@ -1,15 +1,14 @@
 const ApiError = require('../utils/api_error');
 const Product = require('./../models/product');
+const Helper = require('./../utils/helper');
 
 class Product_controller{
     async get_all_products(req, res, next) {
         try{
             let products = await Product.find();
 
-            res.status(200).json({
-                status: 'success',
-                data: products
-            })
+            Helper.sendResponse(res, 200, 'success', products);
+
         }catch(err){
             next(ApiError.internal(err.message));
         }
@@ -18,10 +17,7 @@ class Product_controller{
           try{
             const product = await Product.create(req.body);
 
-            res.status(201).json({
-                status: 'success',
-                data: product
-            })
+            Helper.sendResponse(res, 201, 'success', product);
 
           }catch(err){
             if(err.name == 'ValidationError'){
@@ -39,13 +35,10 @@ class Product_controller{
             const product = await Product.findByIdAndUpdate({_id: req.params.id}, req.body);
 
             if(!product){
-                return next(ApiError.badRequest(`product with id "${req.query.id}" does not exist`))
+                return next(ApiError.badRequest(`product with id "${req.params.id}" does not exist`))
             }
             
-            res.status(200).json({
-                status: 'success',
-                message: 'update successfully'
-            })
+            Helper.sendResponse(res, 200, 'success', "updated successfully");
 
         }catch(err){
             if(err.name === 'CastError'){
@@ -57,16 +50,13 @@ class Product_controller{
 
     async delete_product(req, res, next) {
         try{
-            const product = await Product.findByIdAndDelete(req.query.id);
+            const product = await Product.findByIdAndDelete(req.params.id);
 
             if(!product){
-                return next(ApiError.badRequest(`product with id "${req.query.id}" does not exist`))
+                return next(ApiError.badRequest(`product with id "${req.params.id}" does not exist`))
             }
             
-            res.status(200).json({
-                status: 'success',
-                message: 'deleted successfully'
-            })
+            Helper.sendResponse(res, 200, 'success', "deleted successfully");
 
         }catch(err){
             if(err.name === 'CastError'){

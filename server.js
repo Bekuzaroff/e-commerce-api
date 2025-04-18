@@ -12,7 +12,7 @@ mongoose.connect(process.env.DB_URL).then(value => {
 }).catch((reason) => console.log(reason));
 
 
-const PORT = 8000
+const PORT = 3000
 app.listen(PORT, '127.0.0.1', () => {
     console.log('start server')
 });
